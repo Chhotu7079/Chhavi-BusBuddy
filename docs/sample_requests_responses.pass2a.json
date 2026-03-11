@@ -1,0 +1,173 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "token": "<backend-jwt>",
+      "admin_token": "<backend-admin-jwt>",
+      "company_id": "<firestore-company-id>",
+      "company_email": "owner@example.com",
+      "route_id": "<firestore-route-id>",
+      "bus_code": "BUS-101"
+    },
+    "notes": [
+      "PASS 2A: RouteController examples only (2 examples per endpoint).",
+      "Use with PASS 1 base file (Authentication/Company/Employee).",
+      "HTTP semantics: missing/invalid token => 401, forbidden => 403."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "RouteController",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/routes/{id}",
+          "description": "Public route details (returns PublicRouteResponse).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "path": { "id": "{{route_id}}" }, "headers": {} },
+              "response": {
+                "status": 200,
+                "body": {
+                  "id": "{{route_id}}",
+                  "code": "10_A - B",
+                  "stops": [
+                    { "name": "Stop A", "coords": { "latitude": 12.9, "longitude": 77.5 } },
+                    { "name": "Stop B", "coords": { "latitude": 12.91, "longitude": 77.51 } }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Not found",
+              "request": { "path": { "id": "missing-route" }, "headers": {} },
+              "response": { "status": 404, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "Document not found with id: missing-route" } }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/routes",
+          "description": "Public list of routes (flattened list of PublicRouteResponse).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "headers": {} },
+              "response": { "status": 200, "body": [ { "id": "{{route_id}}", "code": "10_A - B", "stops": [] } ] }
+            },
+            {
+              "name": "Internal error (illustrative)",
+              "request": { "headers": {} },
+              "response": { "status": 500, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 500, "error": "Internal Server Error", "message": "Unable to retrieve routes" } }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/routes?busCode={busCode}",
+          "description": "Get routes by busCode (requires OWNER/EMPLOYEE/ADMIN and ownership).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "query": { "busCode": "{{bus_code}}" }, "headers": { "Authorization": "Bearer {{token}}" } },
+              "response": { "status": 200, "body": [ { "id": "route-1", "code": "10_A - B", "stops": [] } ] }
+            },
+            {
+              "name": "Forbidden (wrong company)",
+              "request": { "query": { "busCode": "{{bus_code}}" }, "headers": { "Authorization": "Bearer {{token}}" } },
+              "response": { "status": 403, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 403, "error": "Forbidden", "message": "You are not allowed to modify this company's resources" } }
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/routes",
+          "description": "Create route (OWNER/EMPLOYEE/ADMIN; ownership enforced).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": {
+                "headers": { "Authorization": "Bearer {{token}}", "Content-Type": "application/json" },
+                "body": {
+                  "company": "{{company_id}}",
+                  "code": "10_A - B",
+                  "stops": {
+                    "forwardStops": [ { "name": "Stop A", "address": "Addr 1" } ],
+                    "backStops": [ { "name": "Stop B", "address": "Addr 2" } ]
+                  }
+                }
+              },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Forbidden (ownership mismatch)",
+              "request": {
+                "headers": { "Authorization": "Bearer {{token}}", "Content-Type": "application/json" },
+                "body": {
+                  "company": "other-company",
+                  "code": "10_A - B",
+                  "stops": { "forwardStops": [ { "address": "Addr 1" } ], "backStops": [] }
+                }
+              },
+              "response": { "status": 403, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 403, "error": "Forbidden", "message": "You are not allowed to modify this company's resources" } }
+            }
+          ]
+        },
+        {
+          "method": "DELETE",
+          "path": "/routes/{id}",
+          "description": "Delete route (OWNER/EMPLOYEE/ADMIN; ownership enforced).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "path": { "id": "{{route_id}}" }, "headers": { "Authorization": "Bearer {{token}}" } },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Missing token",
+              "request": { "path": { "id": "{{route_id}}" }, "headers": {} },
+              "response": { "status": 401, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 401, "error": "Unauthorized", "message": "Unauthorized" } }
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/routes/{id}/delays/recompute",
+          "description": "Recompute delays for one route (OWNER/EMPLOYEE/ADMIN; ownership enforced).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "path": { "id": "{{route_id}}" }, "headers": { "Authorization": "Bearer {{token}}" } },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Not found (no history)",
+              "request": { "path": { "id": "{{route_id}}" }, "headers": { "Authorization": "Bearer {{token}}" } },
+              "response": { "status": 404, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "History not found for route: {{route_id}}" } }
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/routes/delays/recompute",
+          "description": "Recompute delays globally (ADMIN only).",
+          "examples": [
+            {
+              "name": "Success (ADMIN)",
+              "request": { "headers": { "Authorization": "Bearer {{admin_token}}" } },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Forbidden (non-admin)",
+              "request": { "headers": { "Authorization": "Bearer {{token}}" } },
+              "response": { "status": 403, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 403, "error": "Forbidden", "message": "Admin access is required" } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

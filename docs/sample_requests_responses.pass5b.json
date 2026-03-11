@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "admin_token": "<backend-admin-jwt>",
+      "legacy_company_uid": "<legacy-company-uid>",
+      "company_id": "<firestore-company-id>"
+    },
+    "notes": [
+      "PASS 5B: MigrationController examples.",
+      "Admin-only endpoints."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "MigrationController",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/admin/migrations/company-id?legacyCompanyUid={legacyCompanyUid}&newCompanyId={newCompanyId}",
+          "description": "Migrate legacy company UID stored in route.company / bus.company to new stable companyId.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": {
+                "query": { "legacyCompanyUid": "{{legacy_company_uid}}", "newCompanyId": "{{company_id}}" },
+                "headers": { "Authorization": "Bearer {{admin_token}}" }
+              },
+              "response": { "status": 200, "body": 12 }
+            },
+            {
+              "name": "Forbidden (non-admin)",
+              "request": {
+                "query": { "legacyCompanyUid": "{{legacy_company_uid}}", "newCompanyId": "{{company_id}}" },
+                "headers": { "Authorization": "Bearer <non-admin-token>" }
+              },
+              "response": { "status": 403, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 403, "error": "Forbidden", "message": "Admin access is required" } }
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/admin/migrations/search-keys",
+          "description": "Backfill searchKey/fromKey/toKey fields for routes and searchKey for buses.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "headers": { "Authorization": "Bearer {{admin_token}}" } },
+              "response": { "status": 200, "body": 250 }
+            },
+            {
+              "name": "Missing token",
+              "request": { "headers": {} },
+              "response": { "status": 401, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 401, "error": "Unauthorized", "message": "Unauthorized" } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

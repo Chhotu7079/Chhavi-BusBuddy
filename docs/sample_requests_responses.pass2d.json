@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "route_id": "<firestore-route-id>",
+      "from": "Hajipur",
+      "to": "Patna"
+    },
+    "notes": [
+      "PASS 2D: RouteSearchController + RouteLiveController examples.",
+      "All endpoints here are public (no JWT required)."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "RouteSearchController",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/routes/search?from={from}&to={to}",
+          "description": "Search routes by from/to.",
+          "examples": [
+            {
+              "name": "Success (matches found)",
+              "request": { "query": { "from": "{{from}}", "to": "{{to}}" }, "headers": {} },
+              "response": { "status": 200, "body": [ { "routeId": "{{route_id}}", "routeCode": "Hajipur - Patna" } ] }
+            },
+            {
+              "name": "Bad request (missing from)",
+              "request": { "query": { "from": "", "to": "{{to}}" }, "headers": {} },
+              "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "from must not be blank" } }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/routes/search-live?from={from}&to={to}",
+          "description": "Search routes and include live active buses.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "query": { "from": "{{from}}", "to": "{{to}}" }, "headers": {} },
+              "response": {
+                "status": 200,
+                "body": [
+                  {
+                    "routeId": "{{route_id}}",
+                    "routeCode": "Hajipur - Patna",
+                    "activeBuses": [
+                      {
+                        "busId": "bus-1",
+                        "busCode": "BUS-101",
+                        "coords": { "latitude": 12.9716, "longitude": 77.5946 },
+                        "speed": 22.5,
+                        "lastStop": 3,
+                        "direction": "forward",
+                        "routeId": "{{route_id}}",
+                        "lastUpdatedAt": 1710000000000,
+                        "status": "RUNNING"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Bad request (missing to)",
+              "request": { "query": { "from": "{{from}}", "to": "" }, "headers": {} },
+              "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "to must not be blank" } }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "controller": "RouteLiveController",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/routes/{id}/live",
+          "description": "Get active buses for a route from Realtime Database.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "path": { "id": "{{route_id}}" }, "headers": {} },
+              "response": { "status": 200, "body": { "routeId": "{{route_id}}", "activeBuses": [ { "busId": "bus-1", "busCode": "BUS-101", "coords": { "latitude": 12.9716, "longitude": 77.5946 }, "speed": 22.5, "lastStop": 3, "direction": "forward", "routeId": "{{route_id}}", "lastUpdatedAt": 1710000000000, "status": "RUNNING" } ] } }
+            },
+            {
+              "name": "No active buses",
+              "request": { "path": { "id": "{{route_id}}" }, "headers": {} },
+              "response": { "status": 200, "body": { "routeId": "{{route_id}}", "activeBuses": [] } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

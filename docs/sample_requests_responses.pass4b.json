@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "gps_key": "<gps-ingest-api-key>",
+      "gps_imei": "123456789012345"
+    },
+    "notes": [
+      "PASS 4B: GpsIngestQueryController examples.",
+      "Useful for devices/vendors that cannot send JSON bodies."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "GpsIngestQueryController",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/gps/ingest/query?imei={imei}&lat={lat}&lng={lng}&speed={speed}&direction={direction}&lastStop={lastStop}&ts={ts}",
+          "description": "Query-parameter GPS ingest.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": {
+                "headers": { "X-GPS-KEY": "{{gps_key}}" },
+                "query": { "imei": "{{gps_imei}}", "lat": 12.9716, "lng": 77.5946, "speed": 20, "direction": "forward", "lastStop": 3, "ts": 1710000000000 }
+              },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Bad request (missing imei)",
+              "request": { "headers": { "X-GPS-KEY": "{{gps_key}}" }, "query": { "imei": "", "lat": 12.9716, "lng": 77.5946 } },
+              "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "imei must not be blank" } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

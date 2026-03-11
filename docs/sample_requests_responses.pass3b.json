@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "query": "101"
+    },
+    "notes": [
+      "PASS 3B: BusSearchController + BusSearchLiveController examples.",
+      "Both endpoints are public (no JWT required)."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "BusSearchController",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/buses/search?query={query}",
+          "description": "Search buses by partial code/name.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "query": { "query": "{{query}}" }, "headers": {} },
+              "response": { "status": 200, "body": [ { "busId": "bus-1", "busCode": "BUS-101", "routeId": "route-1", "routeCode": "10_A - B" } ] }
+            },
+            {
+              "name": "Bad request (blank query)",
+              "request": { "query": { "query": "" }, "headers": {} },
+              "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "query must not be blank" } }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "controller": "BusSearchLiveController",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/buses/search-live?query={query}",
+          "description": "Search buses and include live state from Realtime DB.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "query": { "query": "{{query}}" }, "headers": {} },
+              "response": {
+                "status": 200,
+                "body": [
+                  {
+                    "busId": "bus-1",
+                    "busCode": "BUS-101",
+                    "routeId": "route-1",
+                    "routeCode": "10_A - B",
+                    "live": {
+                      "busId": "bus-1",
+                      "busCode": "BUS-101",
+                      "coords": { "latitude": 12.9716, "longitude": 77.5946 },
+                      "speed": 22.5,
+                      "lastStop": 3,
+                      "direction": "forward",
+                      "routeId": "route-1",
+                      "lastUpdatedAt": 1710000000000,
+                      "status": "RUNNING"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Bad request (missing query)",
+              "request": { "query": { "query": "" }, "headers": {} },
+              "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "query must not be blank" } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

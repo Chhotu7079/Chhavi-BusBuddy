@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "token": "<backend-jwt>",
+      "company_id": "<firestore-company-id>",
+      "bus_id": "<firestore-bus-id>",
+      "bus_code": "BUS-101",
+      "route_id": "<firestore-route-id>"
+    },
+    "notes": [
+      "PASS 3A: BusController examples only (2 examples per endpoint).",
+      "Some endpoints are public (GET), others are protected (POST/PUT)."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "BusController",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/buses/{id}",
+          "description": "Get bus by id (public).",
+          "examples": [
+            { "name": "Success", "request": { "path": { "id": "{{bus_id}}" }, "headers": {} }, "response": { "status": 200, "body": { "id": "{{bus_id}}", "code": "{{bus_code}}", "route": { "id": "{{route_id}}", "code": "10_A - B" } } } },
+            { "name": "Not found", "request": { "path": { "id": "missing-bus" }, "headers": {} }, "response": { "status": 404, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "Document not found with id: missing-bus" } } }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/buses?code={code}",
+          "description": "Get bus by code (public).",
+          "examples": [
+            { "name": "Success", "request": { "query": { "code": "{{bus_code}}" }, "headers": {} }, "response": { "status": 200, "body": { "id": "{{bus_id}}", "code": "{{bus_code}}", "route": { "id": "{{route_id}}", "code": "10_A - B" } } } },
+            { "name": "Not found", "request": { "query": { "code": "MISSING" }, "headers": {} }, "response": { "status": 404, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "Bus not found with code: MISSING" } } }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/buses/{id}/stops",
+          "description": "Get stops for bus route (public).",
+          "examples": [
+            { "name": "Success", "request": { "path": { "id": "{{bus_id}}" }, "headers": {} }, "response": { "status": 200, "body": { "forwardStops": [ { "id": "stop-1", "name": "Stop A", "address": "Addr 1", "coords": { "latitude": 12.9, "longitude": 77.5 } } ], "backStops": [] } } },
+            { "name": "Not found", "request": { "path": { "id": "missing-bus" }, "headers": {} }, "response": { "status": 404, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "Document not found with id: missing-bus" } } }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/buses/{id}/arrivals?direction={direction}",
+          "description": "Get next arrivals by bus and direction (public).",
+          "examples": [
+            { "name": "Success", "request": { "path": { "id": "{{bus_id}}" }, "query": { "direction": "forward" }, "headers": {} }, "response": { "status": 200, "body": { "stop-1": ["08:10", "08:40"], "stop-2": ["08:25", "08:55"] } } },
+            { "name": "Bad request (invalid direction)", "request": { "path": { "id": "{{bus_id}}" }, "query": { "direction": "sideways" }, "headers": {} }, "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "direction must be either 'forward' or 'back'" } } }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/routes/{id}/stops/reached?stopIndex={stopIndex}&direction={direction}",
+          "description": "Mark a stop as reached in history (protected).",
+          "examples": [
+            { "name": "Success", "request": { "path": { "id": "{{route_id}}" }, "query": { "stopIndex": "0", "direction": "forward" }, "headers": { "Authorization": "Bearer {{token}}" } }, "response": { "status": 200, "body": true } },
+            { "name": "Missing token", "request": { "path": { "id": "{{route_id}}" }, "query": { "stopIndex": "0", "direction": "forward" }, "headers": {} }, "response": { "status": 401, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 401, "error": "Unauthorized", "message": "Unauthorized" } } }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/routes/{id}/history/fix-gaps?direction={direction}",
+          "description": "Fix '-' gaps in today's history (protected).",
+          "examples": [
+            { "name": "Success", "request": { "path": { "id": "{{route_id}}" }, "query": { "direction": "forward" }, "headers": { "Authorization": "Bearer {{token}}" } }, "response": { "status": 200, "body": true } },
+            { "name": "Bad request (invalid direction)", "request": { "path": { "id": "{{route_id}}" }, "query": { "direction": "oops" }, "headers": { "Authorization": "Bearer {{token}}" } }, "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "direction must be either 'forward' or 'back'" } } }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/buses?busCode={busCode}&routeId={routeId}",
+          "description": "Add bus to route (protected; ownership enforced).",
+          "examples": [
+            { "name": "Success", "request": { "query": { "busCode": "BUS-NEW", "routeId": "{{route_id}}" }, "headers": { "Authorization": "Bearer {{token}}" } }, "response": { "status": 200, "body": true } },
+            { "name": "Forbidden (ownership mismatch)", "request": { "query": { "busCode": "BUS-NEW", "routeId": "other-route" }, "headers": { "Authorization": "Bearer {{token}}" } }, "response": { "status": 403, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 403, "error": "Forbidden", "message": "You are not allowed to modify this company's resources" } } }
+          ]
+        },
+        {
+          "method": "PUT",
+          "path": "/buses/{busCode}/route?routeId={routeId}",
+          "description": "Update bus route assignment (protected; ownership enforced).",
+          "examples": [
+            { "name": "Success", "request": { "path": { "busCode": "{{bus_code}}" }, "query": { "routeId": "{{route_id}}" }, "headers": { "Authorization": "Bearer {{token}}" } }, "response": { "status": 200, "body": true } },
+            { "name": "Not found", "request": { "path": { "busCode": "MISSING" }, "query": { "routeId": "{{route_id}}" }, "headers": { "Authorization": "Bearer {{token}}" } }, "response": { "status": 404, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "Bus not found with code: MISSING" } } }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/buses/{id}/delays/average?direction={direction}",
+          "description": "Average delay in minutes (public).",
+          "examples": [
+            { "name": "Success", "request": { "path": { "id": "{{bus_id}}" }, "query": { "direction": "forward" }, "headers": {} }, "response": { "status": 200, "body": 4 } },
+            { "name": "Bad request (invalid direction)", "request": { "path": { "id": "{{bus_id}}" }, "query": { "direction": "x" }, "headers": {} }, "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "direction must be either 'forward' or 'back'" } } }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/buses/{id}/delays/current?direction={direction}",
+          "description": "Current delay in minutes (public).",
+          "examples": [
+            { "name": "Success", "request": { "path": { "id": "{{bus_id}}" }, "query": { "direction": "forward" }, "headers": {} }, "response": { "status": 200, "body": 2 } },
+            { "name": "Bad request (invalid direction)", "request": { "path": { "id": "{{bus_id}}" }, "query": { "direction": "side" }, "headers": {} }, "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "direction must be either 'forward' or 'back'" } } }
+          ]
+        }
+      ]
+    }
+  ]
+}

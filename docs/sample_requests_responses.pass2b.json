@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "stop_id": "<firestore-stop-id>",
+      "lat": 12.9716,
+      "lng": 77.5946,
+      "radius": 500
+    },
+    "notes": [
+      "PASS 2B: StopController examples only (2 examples per endpoint).",
+      "Use with PASS 1 base file (Authentication/Company/Employee)."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "StopController",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/stops/{id}",
+          "description": "Get stop details (public).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "path": { "id": "{{stop_id}}" }, "headers": {} },
+              "response": { "status": 200, "body": { "id": "{{stop_id}}", "name": "Stop A", "address": "Addr 1", "coords": { "latitude": 12.9716, "longitude": 77.5946 } } }
+            },
+            {
+              "name": "Not found",
+              "request": { "path": { "id": "missing-stop" }, "headers": {} },
+              "response": { "status": 404, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "Document not found with id: missing-stop" } }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/stops?latitude={lat}&longitude={lng}&radius={radius}",
+          "description": "Search nearby stops within radius in meters (public).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "query": { "latitude": 12.9716, "longitude": 77.5946, "radius": 500 }, "headers": {} },
+              "response": { "status": 200, "body": [ { "id": "stop-1", "name": "Stop A", "address": "Addr 1", "coords": { "latitude": 12.9716, "longitude": 77.5946 } } ] }
+            },
+            {
+              "name": "Bad request (radius <= 0)",
+              "request": { "query": { "latitude": 12.9716, "longitude": 77.5946, "radius": 0 }, "headers": {} },
+              "response": { "status": 400, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 400, "error": "Bad Request", "message": "radius must be greater than 0" } }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/stops/{id}/next-buses",
+          "description": "Get next bus times from the perspective of a stop (public).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "path": { "id": "{{stop_id}}" }, "headers": {} },
+              "response": {
+                "status": 200,
+                "body": {
+                  "10_A - B": [ "08:10", "08:40" ],
+                  "10_B - A": [ "08:20", "08:50" ]
+                }
+              }
+            },
+            {
+              "name": "Not found",
+              "request": { "path": { "id": "missing-stop" }, "headers": {} },
+              "response": { "status": 404, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "Document not found with id: missing-stop" } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,575 @@
+{
+  "info": {
+    "_postman_id": "4e8abdf2-45b6-4bc8-b7bb-2eb2d94bd0f1",
+    "name": "BusBuddy Backend - Endpoint Test Checklist",
+    "description": "Ready-to-use endpoint checklist for BusBuddy backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "gps_key",
+      "value": ""
+    },
+    {
+      "key": "company_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Health & Docs",
+      "item": [
+        {
+          "name": "GET /actuator/health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/actuator/health"
+          }
+        },
+        {
+          "name": "GET /actuator/info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/actuator/info"
+          }
+        },
+        {
+          "name": "GET /api-docs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api-docs"
+          }
+        },
+        {
+          "name": "GET /swagger-ui.html",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/swagger-ui.html"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Authentication",
+      "item": [
+        {
+          "name": "POST /auth/company/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firebaseIdToken\": \"<firebase-id-token>\"\n}"
+            },
+            "url": "{{base_url}}/auth/company/login"
+          }
+        },
+        {
+          "name": "GET /verify-custom-token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/verify-custom-token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Public Read Endpoints",
+      "item": [
+        {
+          "name": "GET /routes/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/routes/route-1"
+          }
+        },
+        {
+          "name": "GET /routes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/routes"
+          }
+        },
+        {
+          "name": "GET /routes/search (from-to)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/routes/search?from=Hajipur&to=Patna"
+          }
+        },
+        {
+          "name": "GET /routes/search-live (from-to)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/routes/search-live?from=Hajipur&to=Patna"
+          }
+        },
+        {
+          "name": "GET /routes/{id}/live",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/routes/route-1/live"
+          }
+        },
+        {
+          "name": "GET /stops/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/stops/stop-1"
+          }
+        },
+        {
+          "name": "GET /stops (radius filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/stops?latitude=12.9716&longitude=77.5946&radius=500"
+          }
+        },
+        {
+          "name": "GET /stops/{id}/next-buses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/stops/stop-1/next-buses"
+          }
+        },
+        {
+          "name": "GET /buses/search?query=",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/buses/search?query=101"
+          }
+        },
+        {
+          "name": "GET /buses/search-live?query=",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/buses/search-live?query=BUS-101"
+          }
+        },
+        {
+          "name": "GET /buses/{id}",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/buses/bus-1"
+          }
+        },
+        {
+          "name": "GET /buses?code=",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/buses?code=BUS-101"
+          }
+        },
+        {
+          "name": "GET /buses/{id}/stops",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/buses/bus-1/stops"
+          }
+        },
+        {
+          "name": "GET /routes?busCode=",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/routes?busCode=BUS-101"
+          }
+        },
+        {
+          "name": "GET /buses/{id}/arrivals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/buses/bus-1/arrivals?direction=forward"
+          }
+        },
+        {
+          "name": "GET /buses/{id}/delays/average",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/buses/bus-1/delays/average?direction=forward"
+          }
+        },
+        {
+          "name": "GET /buses/{id}/delays/current",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/buses/bus-1/delays/current?direction=forward"
+          }
+        },
+        {
+          "name": "GET /companies?email=",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/companies?email=company@example.com"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Protected Endpoints (JWT Required)",
+      "item": [
+        {
+          "name": "POST /routes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company\": \"company-a\",\n  \"code\": \"10_A - B\",\n  \"stops\": {\n    \"forwardStops\": [\n      {\n        \"name\": \"Stop A\",\n        \"address\": \"Addr 1\",\n        \"coords\": { \"latitude\": 12.9716, \"longitude\": 77.5946 }\n      }\n    ],\n    \"backStops\": []\n  }\n}"
+            },
+            "url": "{{base_url}}/routes"
+          }
+        },
+        {
+          "name": "POST /buses",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/buses?busCode=BUS-101&routeId=route-1"
+          }
+        },
+        {
+          "name": "PUT /buses/{busCode}/route",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/buses/BUS-101/route?routeId=route-1"
+          }
+        },
+        {
+          "name": "POST /routes/{id}/stops/reached",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/routes/route-1/stops/reached?stopIndex=1&direction=forward"
+          }
+        },
+        {
+          "name": "POST /routes/{id}/history/fix-gaps",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/routes/route-1/history/fix-gaps?direction=forward"
+          }
+        },
+        {
+          "name": "DELETE /routes/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/routes/route-1"
+          }
+        },
+        {
+          "name": "POST /routes/{id}/timetable/minutes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"forwardMinutesFromStart\": [0, 30, 90],\n  \"backMinutesFromStart\": []\n}"
+            },
+            "url": "{{base_url}}/routes/route-1/timetable/minutes"
+          }
+        },
+        {
+          "name": "POST /routes/{id}/delays/recompute",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/routes/route-1/delays/recompute"
+          }
+        },
+        {
+          "name": "POST /admin/migrations/company-id (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/admin/migrations/company-id?legacyCompanyUid=oldUid&newCompanyId=newCompanyId"
+          }
+        },
+        {
+          "name": "POST /admin/migrations/search-keys (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/admin/migrations/search-keys"
+          }
+        },
+        {
+          "name": "POST /routes/delays/recompute (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/routes/delays/recompute"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Security Boundary Checks",
+      "item": [
+        {
+          "name": "No token -> expect 401 (POST /buses)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{base_url}}/buses?busCode=BUS-101&routeId=route-1"
+          }
+        },
+        {
+          "name": "Bad token -> expect 401 (POST /buses)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer not-a-valid-jwt",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/buses?busCode=BUS-101&routeId=route-1"
+          }
+        },
+        {
+          "name": "Company token on admin endpoint -> expect 403 (POST /routes/delays/recompute)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/routes/delays/recompute"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - GPS Devices (Registration)",
+      "item": [
+        {
+          "name": "POST /companies/{companyId}/gps-devices",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imei\": \"123456789012345\",\n  \"busId\": \"<busId>\"\n}"
+            },
+            "url": "{{base_url}}/companies/{{company_id}}/gps-devices"
+          }
+        },
+        {
+          "name": "GET /companies/{companyId}/gps-devices",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": "{{base_url}}/companies/{{company_id}}/gps-devices"
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - GPS Ingest (Device/Vendor)",
+      "item": [
+        {
+          "name": "POST /gps/ingest",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" },
+              { "key": "X-GPS-KEY", "value": "{{gps_key}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imei\": \"123456789012345\",\n  \"latitude\": 12.9716,\n  \"longitude\": 77.5946,\n  \"speed\": 23,\n  \"direction\": \"forward\",\n  \"lastStop\": 3,\n  \"deviceTimestamp\": 1710000000000\n}"
+            },
+            "url": "{{base_url}}/gps/ingest"
+          }
+        },
+        {
+          "name": "POST /gps/ingest/query",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-GPS-KEY", "value": "{{gps_key}}", "type": "text" }
+            ],
+            "url": "{{base_url}}/gps/ingest/query?imei=123456789012345&lat=12.9716&lng=77.5946&speed=23&direction=forward&lastStop=3&ts=1710000000000"
+          }
+        },
+        {
+          "name": "POST /webhooks/gps",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" },
+              { "key": "X-GPS-KEY", "value": "{{gps_key}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imei\": \"123456789012345\",\n  \"latitude\": 12.9716,\n  \"longitude\": 77.5946\n}"
+            },
+            "url": "{{base_url}}/webhooks/gps"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Company Endpoints",
+      "item": [
+        {
+          "name": "POST /companies/signup (company registration)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"company@example.com\",\n  \"password\": \"StrongPass123\",\n  \"company\": \"company-a\"\n}"
+            },
+            "url": "{{base_url}}/companies/signup"
+          }
+        },
+        {
+          "name": "GET /companies?email=",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/companies?email=company@example.com"
+          }
+        }
+      ]
+    }
+  ]
+}

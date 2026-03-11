@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "token": "<backend-jwt>",
+      "route_id": "<firestore-route-id>"
+    },
+    "notes": [
+      "PASS 2C: RouteTimetableController examples only (2 examples per endpoint).",
+      "Protected endpoint: requires OWNER/EMPLOYEE/ADMIN and ownership." 
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "RouteTimetableController",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/routes/{id}/timetable/minutes",
+          "description": "Update timetable using minutes-from-start per stop index.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": {
+                "path": { "id": "{{route_id}}" },
+                "headers": { "Authorization": "Bearer {{token}}", "Content-Type": "application/json" },
+                "body": {
+                  "forwardMinutesFromStart": [0, 10, 25],
+                  "backMinutesFromStart": [0, 12, 28]
+                }
+              },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Validation error (missing arrays)",
+              "request": {
+                "path": { "id": "{{route_id}}" },
+                "headers": { "Authorization": "Bearer {{token}}", "Content-Type": "application/json" },
+                "body": {}
+              },
+              "response": {
+                "status": 400,
+                "body": {
+                  "timestamp": "2026-03-11T00:00:00Z",
+                  "status": 400,
+                  "error": "Bad Request",
+                  "message": "Request validation failed",
+                  "validationErrors": {
+                    "forwardMinutesFromStart": "must not be null",
+                    "backMinutesFromStart": "must not be null"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

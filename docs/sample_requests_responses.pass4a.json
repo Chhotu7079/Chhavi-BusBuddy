@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "gps_key": "<gps-ingest-api-key>",
+      "gps_signature": "<hmac-base64url-signature>",
+      "gps_imei": "123456789012345"
+    },
+    "notes": [
+      "PASS 4A: GpsIngestController examples.",
+      "These endpoints are public but authenticated by X-GPS-KEY (legacy) or X-GPS-SIGNATURE (preferred)."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "GpsIngestController",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/gps/ingest",
+          "description": "Direct device GPS ingest (JSON body).",
+          "examples": [
+            {
+              "name": "Success (global key mode)",
+              "request": {
+                "headers": { "X-GPS-KEY": "{{gps_key}}", "Content-Type": "application/json" },
+                "body": { "imei": "{{gps_imei}}", "latitude": 12.9716, "longitude": 77.5946, "speed": 22.5, "direction": "forward", "lastStop": 3 }
+              },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Unauthorized (bad key)",
+              "request": {
+                "headers": { "X-GPS-KEY": "wrong", "Content-Type": "application/json" },
+                "body": { "imei": "{{gps_imei}}", "latitude": 12.9716, "longitude": 77.5946 }
+              },
+              "response": { "status": 401, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 401, "error": "Unauthorized", "message": "Invalid GPS ingest key" } }
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/webhooks/gps",
+          "description": "Vendor webhook GPS ingest (JSON body).",
+          "examples": [
+            {
+              "name": "Success (signature mode)",
+              "request": {
+                "headers": { "X-GPS-SIGNATURE": "{{gps_signature}}", "Content-Type": "application/json" },
+                "body": { "imei": "{{gps_imei}}", "latitude": 12.9716, "longitude": 77.5946, "deviceTimestamp": 1710000000000 }
+              },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Unauthorized (missing deviceTimestamp for signature)",
+              "request": {
+                "headers": { "X-GPS-SIGNATURE": "{{gps_signature}}", "Content-Type": "application/json" },
+                "body": { "imei": "{{gps_imei}}", "latitude": 12.9716, "longitude": 77.5946 }
+              },
+              "response": { "status": 401, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 401, "error": "Unauthorized", "message": "deviceTimestamp is required when using signature auth" } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

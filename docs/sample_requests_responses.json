@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "generatedAt": "2026-03-11",
+    "baseUrl": "{{base_url}}",
+    "variables": {
+      "base_url": "http://localhost:8080",
+      "token": "<backend-jwt>",
+      "admin_token": "<backend-admin-jwt>",
+      "company_id": "<firestore-company-id>",
+      "company_email": "owner@example.com"
+    },
+    "notes": [
+      "PASS 1/?: Authentication + Company + Employee examples.",
+      "Two examples per endpoint (typically success + failure).",
+      "HTTP semantics: missing/invalid token => 401, authenticated but forbidden (role/ownership) => 403.",
+      "Error bodies follow ApiErrorResponse / ValidationErrorResponse shapes."
+    ]
+  },
+  "controllers": [
+    {
+      "controller": "AuthenticationController",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/auth/company/login",
+          "description": "Exchange Firebase ID token for backend JWT.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": {
+                "headers": { "Content-Type": "application/json" },
+                "body": { "firebaseIdToken": "<firebase-id-token>" }
+              },
+              "response": { "status": 200, "body": { "token": "{{token}}", "role": "OWNER", "companyId": "{{company_id}}" } }
+            },
+            {
+              "name": "Invalid Firebase token",
+              "request": {
+                "headers": { "Content-Type": "application/json" },
+                "body": { "firebaseIdToken": "invalid-token" }
+              },
+              "response": {
+                "status": 401,
+                "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 401, "error": "Unauthorized", "message": "Invalid Firebase ID token" }
+              }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/verify-custom-token",
+          "description": "Verify backend JWT.",
+          "examples": [
+            {
+              "name": "Valid token",
+              "request": { "headers": { "Authorization": "Bearer {{token}}" } },
+              "response": { "status": 200, "body": true }
+            },
+            {
+              "name": "Invalid token",
+              "request": { "headers": { "Authorization": "Bearer not-a-valid-jwt" } },
+              "response": {
+                "status": 401,
+                "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 401, "error": "Unauthorized", "message": "Invalid or expired token" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "controller": "CompanyController",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/companies/signup",
+          "description": "Company registration. Creates Firebase Auth user + Firestore company doc + OWNER employee mapping.",
+          "examples": [
+            {
+              "name": "Success",
+              "request": {
+                "headers": { "Content-Type": "application/json" },
+                "body": { "email": "owner@example.com", "password": "StrongPass123", "company": "Chhavi Transport" }
+              },
+              "response": { "status": 200, "body": "Azienda registrata con successo con ID: {{company_id}}" }
+            },
+            {
+              "name": "Validation error",
+              "request": {
+                "headers": { "Content-Type": "application/json" },
+                "body": { "email": "", "password": "x", "company": "" }
+              },
+              "response": {
+                "status": 400,
+                "body": {
+                  "timestamp": "2026-03-11T00:00:00Z",
+                  "status": 400,
+                  "error": "Bad Request",
+                  "message": "Request validation failed",
+                  "validationErrors": {
+                    "email": "must not be blank",
+                    "password": "must be at least 8 characters",
+                    "company": "must not be blank"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/companies",
+          "description": "Lookup company name by email (public only when email query param is provided).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "query": { "email": "{{company_email}}" }, "headers": {} },
+              "response": { "status": 200, "body": "Chhavi Transport" }
+            },
+            {
+              "name": "Not found",
+              "request": { "query": { "email": "missing@example.com" }, "headers": {} },
+              "response": {
+                "status": 404,
+                "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 404, "error": "Not Found", "message": "Company not found for email: missing@example.com" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "controller": "EmployeeController",
+      "endpoints": [
+        {
+          "method": "POST",
+          "path": "/companies/{companyId}/employees",
+          "description": "Create employee under a company (OWNER or ADMIN).",
+          "examples": [
+            {
+              "name": "Success (OWNER)",
+              "request": {
+                "path": { "companyId": "{{company_id}}" },
+                "headers": { "Authorization": "Bearer {{token}}", "Content-Type": "application/json" },
+                "body": { "email": "employee1@example.com", "password": "StrongPass123", "name": "Driver One" }
+              },
+              "response": { "status": 200, "body": "<new-employee-uid>" }
+            },
+            {
+              "name": "Forbidden (not OWNER/ADMIN)",
+              "request": {
+                "path": { "companyId": "{{company_id}}" },
+                "headers": { "Authorization": "Bearer {{token}}", "Content-Type": "application/json" },
+                "body": { "email": "employee2@example.com", "password": "StrongPass123" }
+              },
+              "response": {
+                "status": 403,
+                "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 403, "error": "Forbidden", "message": "Owner or admin access is required" }
+              }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/companies/{companyId}/employees",
+          "description": "List employees for a company (OWNER or ADMIN).",
+          "examples": [
+            {
+              "name": "Success",
+              "request": { "path": { "companyId": "{{company_id}}" }, "headers": { "Authorization": "Bearer {{token}}" } },
+              "response": { "status": 200, "body": [ { "uid": "employee-uid-1", "email": "employee1@example.com", "role": "EMPLOYEE", "active": true, "companyId": "{{company_id}}" } ] }
+            },
+            {
+              "name": "Missing token",
+              "request": { "path": { "companyId": "{{company_id}}" }, "headers": {} },
+              "response": { "status": 401, "body": { "timestamp": "2026-03-11T00:00:00Z", "status": 401, "error": "Unauthorized", "message": "Unauthorized" } }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
