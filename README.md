@@ -689,4 +689,4 @@ mvnw.cmd test
 
 ## License
 
-Add your project license here (MIT/Apache-2.0/Proprietary).
+MIT License — see [LICENSE](./LICENSE).
